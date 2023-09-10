@@ -32,25 +32,23 @@ export default function Home() {
   const handleScroll = () => {
     const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
 
-    if (!searchTerm) {
-      if (scrollTop + clientHeight >= scrollHeight - 100) {
-        let newTake = take + 100;
+    if (scrollTop + clientHeight >= scrollHeight - 100 && !searchTerm) {
+      let newTake = take + 100;
 
-        if (newTake === 1392) {
-          return;
-        }
-
-        if (newTake > 1392) {
-          newTake = 1392;
-        }
-
-        fetchMore({
-          variables: {
-            take: newTake,
-          },
-        });
-        setTake(newTake);
+      if (newTake === 1392) {
+        return;
       }
+
+      if (newTake > 1392) {
+        newTake = 1392;
+      }
+
+      fetchMore({
+        variables: {
+          take: newTake,
+        },
+      });
+      setTake(newTake);
     }
   };
 
@@ -59,7 +57,7 @@ export default function Home() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [take]);
+  }, [take, value]);
 
   const pokemonsFromQuery = data?.getAllPokemon.filter((pokemon) =>
     pokemon.key.includes(value)
