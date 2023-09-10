@@ -60,18 +60,16 @@ function page() {
             className="container-card-pokemon"
             style={{ justifyContent: "normal" }}
           >
-            {pokemons.length > 0
-              ? pokemons.map((pokemon) => (
-                  <div key={pokemon.key}>
-                    <Card
-                      name={pokemon.key}
-                      img={pokemon.sprite}
-                      types={pokemon.types}
-                      color={pokemon.color}
-                    />
-                  </div>
-                ))
-              : null}
+            {pokemons.map((pokemon) => (
+              <div key={pokemon.key}>
+                <Card
+                  name={pokemon.key}
+                  img={pokemon.sprite}
+                  types={pokemon.types}
+                  color={pokemon.color}
+                />
+              </div>
+            ))}
           </div>
         </>
       )}
