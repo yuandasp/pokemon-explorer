@@ -32,23 +32,25 @@ export default function Home() {
   const handleScroll = () => {
     const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
 
-    if (scrollTop + clientHeight >= scrollHeight - 100) {
-      let newTake = take + 100;
+    if (!searchTerm) {
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        let newTake = take + 100;
 
-      if (newTake === 1392) {
-        return;
+        if (newTake === 1392) {
+          return;
+        }
+
+        if (newTake > 1392) {
+          newTake = 1392;
+        }
+
+        fetchMore({
+          variables: {
+            take: newTake,
+          },
+        });
+        setTake(newTake);
       }
-
-      if (newTake > 1392) {
-        newTake = 1392;
-      }
-
-      fetchMore({
-        variables: {
-          take: newTake,
-        },
-      });
-      setTake(newTake);
     }
   };
 
