@@ -138,11 +138,11 @@
 
 .nav-items-regular p {
   font-size: larger;
-  color: #d3d3d3;
+  color: #0e1f40;
   padding: 4px 8px;
 
   &:hover {
-    color: #0e1f40;
+    color: #526a97;
     border-radius: 8px;
   }
 }
@@ -153,6 +153,7 @@
   font-size: larger;
   font-weight: 600;
   padding: 4px 8px;
+  text-decoration: underline;
 }
 
 .nav-items-login {
