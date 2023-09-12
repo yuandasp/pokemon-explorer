@@ -15,8 +15,6 @@ function page() {
 
   if (user === null) return redirect("/login");
 
-  console.log({ pokemons });
-
   const getAllCatchedPokemon = async () => {
     const userId = user.uid || "";
     try {

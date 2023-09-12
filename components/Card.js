@@ -74,6 +74,7 @@ const Card = ({ name, img, types, color, catchRate }) => {
         const randomNumber = Math.floor(Math.random() * 100);
         const catchArr = catchRate.split("%");
         const rateToCatch = Number(catchArr[0]);
+        console.log({ randomNumber, rateToCatch });
 
         Swal.fire({
           title: null,
