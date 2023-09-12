@@ -6,10 +6,14 @@ import Loader from "@/components/Loader";
 import { UserAuth } from "@/app/context/AuthContext";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
-import { addPokemonToFirestore } from "@/lib/firebase/pokemonController";
+import {
+  addPokemonToFirestore,
+  catchPokemonToFirestore,
+} from "@/lib/firebase/pokemonController";
 import { getBackgroundColor } from "@/lib/getBackgroundColor";
 import BarStats from "@/components/BarStats";
 import AbilitiesCard from "@/components/AbilitiesCard";
+import Image from "next/image";
 
 const pokemonDetail = gql`
   query GetPokemon($pokemon: PokemonEnum!) {
@@ -38,6 +42,9 @@ const pokemonDetail = gql`
       backSprite
       types {
         name
+      }
+      catchRate {
+        percentageWithOrdinaryPokeballAtFullHealth
       }
       baseStats {
         attack
@@ -68,7 +75,14 @@ function page({ params }) {
   const pokemonColor = pokemon.color;
   const typeNames = pokemon.types.map((type) => type.name).join("/");
 
-  const handleSavePokemon = async (img, name, userId, color, types) => {
+  const handleSavePokemon = async (
+    img,
+    name,
+    userId,
+    color,
+    types,
+    catchRate
+  ) => {
     if (user === null) {
       Swal.fire({
         title: "You must login first!",
@@ -85,7 +99,66 @@ function page({ params }) {
     } else {
       try {
         Swal.fire("Saved!", "You add this pokemon as your Favorite", "success");
-        addPokemonToFirestore(img, name, userId, color, types);
+        addPokemonToFirestore(img, name, userId, color, types, catchRate);
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }
+  };
+
+  const handleCatchPokemon = async (
+    img,
+    name,
+    userId,
+    color,
+    types,
+    catchRate
+  ) => {
+    if (user === null) {
+      Swal.fire({
+        title: "You must login first!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Login",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/login");
+        }
+      });
+    } else {
+      try {
+        const randomNumber = Math.floor(Math.random() * 100);
+        const catchArr = catchRate.split("%");
+        const rateToCatch = Number(catchArr[0]);
+
+        Swal.fire({
+          title: null,
+          html: `
+            <div className="loader">
+              <img src="/assets/loader-catch-pokemon.gif" alt="" width={240} />
+              <p style={{ marginTop: "16px" }}>Catching pokemon...</p>
+            </div>
+          `,
+          timer: 2000,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        }).then((result) => {
+          if (randomNumber < rateToCatch) {
+            Swal.fire("Congratulations!", "You catch this pokemon", "success");
+            catchPokemonToFirestore(img, name, userId, color, types, catchRate);
+            router.push("/mypokemon");
+          } else {
+            Swal.fire(
+              "Try again!",
+              "You failed to catch this pokemon",
+              "warning"
+            );
+          }
+        });
       } catch (error) {
         throw new Error(error.message);
       }
@@ -113,19 +186,51 @@ function page({ params }) {
           </div>
           <div className="type-and-like">
             <p className="pokemon-types">{typeNames}</p>
-            <div
-              onClick={() =>
-                handleSavePokemon(
-                  pokemon.sprite,
-                  pokemon.key,
-                  userId,
-                  pokemon.color,
-                  pokemon.types
-                )
-              }
-              className="cursor-pointer"
-            >
-              <img src="/assets/love-icon.png" alt="" width={50} height={50} />
+
+            <div className="container-btn-card-detail">
+              <div
+                onClick={() =>
+                  handleSavePokemon(
+                    pokemon.sprite,
+                    pokemon.key,
+                    userId,
+                    pokemon.color,
+                    pokemon.types,
+                    pokemon.catchRate.percentageWithOrdinaryPokeballAtFullHealth
+                  )
+                }
+                className="cursor-pointer btn-icon-card-detail"
+              >
+                <Image
+                  src="/assets/love-icon.png"
+                  alt="like"
+                  width={36}
+                  height={36}
+                />
+                <p>Like</p>
+              </div>
+
+              <div
+                onClick={() =>
+                  handleCatchPokemon(
+                    pokemon.sprite,
+                    pokemon.key,
+                    userId,
+                    pokemon.color,
+                    pokemon.types,
+                    pokemon.catchRate.percentageWithOrdinaryPokeballAtFullHealth
+                  )
+                }
+                className="cursor-pointer btn-icon-card-detail"
+              >
+                <Image
+                  src="/assets/pokemon-ball-icon.png"
+                  width={36}
+                  height={36}
+                  alt="catch"
+                />
+                <p className="">Catch!</p>
+              </div>
             </div>
           </div>
         </div>

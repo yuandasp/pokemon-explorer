@@ -15,6 +15,9 @@ const GetAllPokemons = gql`
       types {
         name
       }
+      catchRate {
+        percentageWithOrdinaryPokeballAtFullHealth
+      }
     }
   }
 `;
@@ -88,6 +91,9 @@ export default function Home() {
               img={pokemon.sprite}
               types={pokemon.types}
               color={pokemon.color}
+              catchRate={
+                pokemon.catchRate.percentageWithOrdinaryPokeballAtFullHealth
+              }
             />
           </div>
         ))}

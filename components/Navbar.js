@@ -85,6 +85,20 @@ function Navbar() {
             </Link>
           </div>
         )}
+
+        {pathname === "/mypokemon" ? (
+          <div className="nav-items-active">
+            <Link href="/mypokemon">
+              <p>My Pokemon</p>
+            </Link>
+          </div>
+        ) : (
+          <div className="nav-items-regular ">
+            <Link href="/mypokemon">
+              <p>My Pokemon</p>
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="nav-items-login">

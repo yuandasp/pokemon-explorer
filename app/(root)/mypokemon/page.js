@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { UserAuth } from "@/app/context/AuthContext";
 import { redirect } from "next/navigation";
@@ -16,11 +15,13 @@ function page() {
 
   if (user === null) return redirect("/login");
 
-  const getFavoritPokemon = async () => {
+  console.log({ pokemons });
+
+  const getAllCatchedPokemon = async () => {
     const userId = user.uid || "";
     try {
       const q = query(
-        collection(db, "pokemons"),
+        collection(db, "catched_pokemons"),
         where("userId", "==", userId)
       );
       const querySnapshot = await getDocs(q);
@@ -37,7 +38,7 @@ function page() {
 
   useEffect(() => {
     if (user.uid) {
-      getFavoritPokemon();
+      getAllCatchedPokemon();
     }
   }, [user.uid]);
 
@@ -58,7 +59,7 @@ function page() {
       ) : (
         <>
           <p className="title-page">
-            Your favorite {pokemons.length} Pokemons:
+            Your already catch {pokemons.length} Pokemon:
           </p>
 
           <div

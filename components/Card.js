@@ -1,20 +1,30 @@
 "use client";
 import { UserAuth } from "@/app/context/AuthContext";
-import { addPokemonToFirestore } from "@/lib/firebase/pokemonController";
+import {
+  addPokemonToFirestore,
+  catchPokemonToFirestore,
+} from "@/lib/firebase/pokemonController";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import Swal from "sweetalert2";
 
-const Card = ({ name, img, types, color }) => {
+const Card = ({ name, img, types, color, catchRate }) => {
   const pathname = usePathname();
   const { user } = UserAuth();
   const router = useRouter();
   const userId = user?.uid;
   const [imgSrc, setImgSrc] = useState(img);
 
-  const handleSavePokemon = async (img, name, userId, color, types) => {
+  const handleSavePokemon = async (
+    img,
+    name,
+    userId,
+    color,
+    types,
+    catchRate
+  ) => {
     if (user === null) {
       Swal.fire({
         title: "You must login first!",
@@ -31,7 +41,66 @@ const Card = ({ name, img, types, color }) => {
     } else {
       try {
         Swal.fire("Saved!", "You add this pokemon as your Favorite", "success");
-        addPokemonToFirestore(img, name, userId, color, types);
+        addPokemonToFirestore(img, name, userId, color, types, catchRate);
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }
+  };
+
+  const handleCatchPokemon = async (
+    img,
+    name,
+    userId,
+    color,
+    types,
+    catchRate
+  ) => {
+    if (user === null) {
+      Swal.fire({
+        title: "You must login first!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Login",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/login");
+        }
+      });
+    } else {
+      try {
+        const randomNumber = Math.floor(Math.random() * 100);
+        const catchArr = catchRate.split("%");
+        const rateToCatch = Number(catchArr[0]);
+
+        Swal.fire({
+          title: null,
+          html: `
+            <div className="loader">
+              <img src="/assets/loader-catch-pokemon.gif" alt="" width={240} />
+              <p style={{ marginTop: "16px" }}>Catching pokemon...</p>
+            </div>
+          `,
+          timer: 2000,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        }).then((result) => {
+          if (randomNumber < rateToCatch) {
+            Swal.fire("Congratulations!", "You catch this pokemon", "success");
+            catchPokemonToFirestore(img, name, userId, color, types, catchRate);
+            router.push("/mypokemon");
+          } else {
+            Swal.fire(
+              "Try again!",
+              "You failed to catch this pokemon",
+              "warning"
+            );
+          }
+        });
       } catch (error) {
         throw new Error(error.message);
       }
@@ -106,18 +175,42 @@ const Card = ({ name, img, types, color }) => {
         <div className="btn-in-card">
           {pathname === "/favorite" ? null : (
             <div
-              onClick={() => handleSavePokemon(img, name, userId, color, types)}
-              className="cursor-pointer"
+              onClick={() =>
+                handleSavePokemon(img, name, userId, color, types, catchRate)
+              }
+              className="cursor-pointer container-icon"
             >
               <img src="/assets/love-icon.png" alt="" width={20} height={20} />
+              <p className="label-icon-on-card">Like</p>
             </div>
           )}
 
-          <div>
-            <Link href={`/pokemon/${name}`}>
-              <img src="/assets/info-icon.png" alt="" width={20} height={20} />
-            </Link>
-          </div>
+          <Link
+            href={`/pokemon/${name}`}
+            style={{ textDecoration: "none", color: "white" }}
+          >
+            <div className="container-icon">
+              <img src="/assets/info-icon.png" alt="" width={19} height={19} />
+              <p className="label-icon-on-card">info</p>
+            </div>
+          </Link>
+
+          {pathname === "/mypokemon" ? null : (
+            <div
+              onClick={() =>
+                handleCatchPokemon(img, name, userId, color, types, catchRate)
+              }
+              className="cursor-pointer container-icon"
+            >
+              <Image
+                src="/assets/pokemon-ball-icon.png"
+                width={20}
+                height={20}
+                alt="catch"
+              />
+              <p className="label-icon-on-card">Catch!</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
