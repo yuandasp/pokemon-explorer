@@ -136,7 +136,7 @@ function page({ params }) {
         Swal.fire({
           title: null,
           html: `
-            <div className="loader">
+            <div className="loader hide-scrollbar">
               <img src="/assets/loader-catch-pokemon.gif" alt="" width={240} />
               <p style={{ marginTop: "16px" }}>Catching pokemon...</p>
             </div>
